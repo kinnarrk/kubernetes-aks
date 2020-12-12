@@ -24,4 +24,5 @@ module "setup-aks-cluster" {
   public_key = var.public_key
   vm_size = var.vm_size
   dns_zone = var.dns_zone
+  key_path = var.key_path
 }
