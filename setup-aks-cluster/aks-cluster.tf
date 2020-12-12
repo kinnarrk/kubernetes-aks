@@ -129,6 +129,81 @@ resource "azurerm_dns_zone" "example-public" {
   resource_group_name = azurerm_resource_group.cluster-rg.name
 }
 
+resource "azurerm_public_ip" "pip" {
+  name                    = "test-pip"
+  location                = azurerm_resource_group.cluster-rg.location
+  resource_group_name     = azurerm_resource_group.cluster-rg.name
+  allocation_method       = "Dynamic"
+  idle_timeout_in_minutes = 30
+}
+
+resource "azurerm_network_security_group" "myterraformnsg" {
+  name                = "myNetworkSecurityGroup"
+  location            = "eastus"
+  resource_group_name = azurerm_resource_group.cluster-rg.name
+
+  security_rule {
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  tags = {
+    environment = "Terraform Demo"
+  }
+}
+
+resource "azurerm_network_interface" "nic" {
+  name                = "test-nic"
+  location                = azurerm_resource_group.cluster-rg.location
+  resource_group_name     = azurerm_resource_group.cluster-rg.name
+
+  ip_configuration {
+    name                          = "testconfiguration1"
+    subnet_id                     = azurerm_subnet.aks-subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.pip.id
+  }
+}
+
+resource "azurerm_virtual_machine" "example" {
+  name                  = "bastion"
+  location                = azurerm_resource_group.cluster-rg.location
+  resource_group_name     = azurerm_resource_group.cluster-rg.name
+  network_interface_ids = [azurerm_network_interface.nic.id]
+
+  vm_size = "Standard_DS1_v2"
+  storage_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
+  storage_os_disk {
+    name              = "myosdisk1"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+  os_profile {
+    computer_name  = "hostname"
+    admin_username = "bastion"
+  }
+  os_profile_linux_config {
+    ssh_keys {
+      key_data = var.public_key
+      path = var.key_path
+    }
+    disable_password_authentication = true
+  }
+}
+
 output "resource_group_name" {
   value = azurerm_resource_group.cluster-rg.name
 }

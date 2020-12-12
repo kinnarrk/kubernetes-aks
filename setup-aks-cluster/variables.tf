@@ -22,3 +22,4 @@ variable "node_count" {}
 variable "public_key" {}
 variable "vm_size" {}
 variable "dns_zone" {}
+variable "key_path" {}
