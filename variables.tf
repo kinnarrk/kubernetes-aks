@@ -20,3 +20,5 @@ variable "min_count" {}
 variable "max_count" {}
 variable "node_count" {}
 variable "public_key" {}
+variable "vm_size" {}
+variable "dns_zone" {}

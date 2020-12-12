@@ -22,4 +22,6 @@ module "setup-aks-cluster" {
   sku_name = var.sku_name
   webapp-db-name = var.webapp-db-name
   public_key = var.public_key
+  vm_size = var.vm_size
+  dns_zone = var.dns_zone
 }

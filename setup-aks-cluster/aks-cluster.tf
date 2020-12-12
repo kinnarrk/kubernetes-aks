@@ -74,7 +74,7 @@ resource "azurerm_kubernetes_cluster" "aks-cluster" {
     max_count = var.max_count
     enable_auto_scaling = true
     node_count      = var.node_count
-    vm_size         = "Standard_D2_v2"
+    vm_size         = var.vm_size
     os_disk_size_gb = 30
     vnet_subnet_id = azurerm_subnet.aks-subnet.id
     availability_zones = ["1","2","3"]
@@ -120,8 +120,13 @@ resource "azurerm_mysql_virtual_network_rule" "msql-vnet-rule" {
   server_name         = azurerm_mysql_server.mysql-db.name
   subnet_id           = azurerm_subnet.aks-subnet.id
   depends_on = [
-
+    azurerm_subnet.aks-subnet
   ]
+}
+
+resource "azurerm_dns_zone" "example-public" {
+  name                = var.dns_zone
+  resource_group_name = azurerm_resource_group.cluster-rg.name
 }
 
 output "resource_group_name" {
