@@ -1,0 +1,4 @@
+- name: Basic deploy of a service
+  community.general.terraform:
+    project_path: '{{ project_dir }}'
+    state: present
